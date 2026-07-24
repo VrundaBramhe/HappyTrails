@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HappyTrails</title>
+  <meta name="description"
+    content="Plan your multi-stop journey and discover the best route to experience every destination — without unnecessary detours. Free, no sign-up required." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap"
+    rel="stylesheet" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- ====== NAVBAR ====== -->
+    <header class="navbar">
+      <div class="navbar-inner">
+        <div>
+          <span class="navbar-brand">HappyTrails</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== HERO ====== -->
+    <section class="hero">
+      <h1 class="hero-title">
+        Less Planning, <span class="highlight">More Exploring.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Discover the best way to experience every destination — without unnecessary detours.
+        Add your stops, and we'll find the happiest route for you.
+      </p>
+    </section>
+
+    <!-- ====== MAIN ====== -->
+    <main class="main-content">
+      <div class="content-stack">
+
+        <!-- ---- Planner Card ---- -->
+        <div class="card">
+          <h2 class="card-title">Plan your route</h2>
+          <p class="card-subtitle">Search and select places — suggestions appear as you type.</p>
+
+          <!-- Starting Location -->
+          <div class="start-input-section">
+            <div id="start-input-container"></div>
+          </div>
+
+          <!-- Destinations header -->
+          <div class="destinations-header">
+            <label class="form-label">Destinations</label>
+            <span class="dest-count" id="dest-count">0 selected</span>
+          </div>
+
+          <!-- Destination rows -->
+          <div class="destinations-list" id="destinations-list"></div>
+
+          <!-- Add destination -->
+          <button type="button" class="add-dest-btn" id="add-dest-btn">+ Add Destination</button>
+
+          <!-- Route options -->
+          <div class="route-options">
+            <div>
+              <label class="form-label" for="optimize-by">Optimize By</label>
+              <select id="optimize-by">
+                <option value="distance">Minimum Distance</option>
+                <option value="time">Minimum Travel Time</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="route-type">Route Type</label>
+              <select id="route-type">
+                <option value="open">Open Route (finish at last stop)</option>
+                <option value="round">Round Trip (return to start)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Optimize button -->
+          <button type="button" class="optimize-btn" id="optimize-btn">
+            <span id="optimize-btn-text">Optimize Route</span>
+            <span class="optimize-btn-loading" id="optimize-btn-loading">
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                <circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              Optimizing route...
+            </span>
+          </button>
+        </div>
+
+        <!-- ---- Result Summary Card ---- -->
+        <div class="card fade-in" id="result-card">
+          <div class="result-header">
+            <h2 class="card-title">Route Summary</h2>
+            <span class="result-meta" id="result-meta"></span>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Start</div>
+              <div class="stat-value" id="stat-start"></div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Stops</div>
+              <div class="stat-value" id="stat-stops"></div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Total Distance</div>
+              <div class="stat-value" id="stat-distance"></div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Estimated Time</div>
+              <div class="stat-value" id="stat-time"></div>
+            </div>
+          </div>
+
+          <!-- OSRM warning -->
+          <div class="osrm-warning" id="osrm-warning">
+            OSRM routing was unavailable — distance/time were estimated using straight-line
+            distance and an assumed average driving speed.
+          </div>
+
+          <!-- Route steps -->
+          <h3 class="route-steps-title">Optimal Route</h3>
+          <ol class="route-steps" id="route-steps"></ol>
+
+          <!-- Google Maps link -->
+          <a class="gmaps-link" id="gmaps-link" href="#" target="_blank" rel="noreferrer">
+            Open in Google Maps
+          </a>
+        </div>
+
+        <!-- ---- Map / Empty State ---- -->
+        <div class="map-container-outer">
+          <!-- Map (hidden until result) -->
+          <div class="map-wrapper" id="map-wrapper">
+            <div id="map"></div>
+          </div>
+
+          <!-- Empty state (shown by default) -->
+          <div class="empty-state" id="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <h3 class="empty-state-title">Your route will appear here</h3>
+            <p class="empty-state-text">
+              Add a starting location and at least one destination, then click
+              <span class="highlight">Optimize Route</span> to see your journey mapped out.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="app-footer">
+      HappyTrails — your travel companion for smarter journeys.
+    </footer>
+
+    <!-- ====== TOAST CONTAINER ====== -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <!-- ====== SCRIPTS ====== -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- App scripts (order matters: dependencies before dependents) -->
+  <script src="js/api.js"></script>
+  <script src="js/tsp.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+# HappyTrails — Static vanilla HTML/CSS/JS site
+# No build step required: deploy the root directory directly.
+
+[build]
+  publish = "."
+
+# Single-page app: send all routes to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
