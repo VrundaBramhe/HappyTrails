@@ -6,7 +6,7 @@ HappyTrails is a travel route optimization web app that helps users plan trips e
 
 Using the **Travelling Salesman Problem (TSP)** algorithm, it reduces unnecessary backtracking and provides an optimized travel sequence with distance, time, and interactive map visualization.
 
-🔗 **Live Demo:** https://your-netlify-link.netlify.app/
+🔗 **Live Demo:** [https://happytails-v.netlify.app/](https://happytrails-v.netlify.app/)
 
 ---
 
